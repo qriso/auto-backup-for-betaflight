@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Backup for Betaflight",
+  "version": "2.0",
+  "description": "Automated screenshot and CLI backup tool for the Betaflight Web Configurator.",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "scripting",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://app.betaflight.com/*"
+  ],
+  "icons": {
+    "16": "icon-v2.png",
+    "48": "icon-v2.png",
+    "128": "icon-v2.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon-v2.png",
+      "48": "icon-v2.png",
+      "128": "icon-v2.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.betaflight.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "commands": {
+    "start-backup": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+B",
+        "mac": "Command+Shift+B"
+      },
+      "description": "Start Betaflight Backup"
+    }
+  }
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+    <title>Auto Backup for Betaflight</title>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <img src="icon-v2.png" alt="" class="logo-icon">
+                <div class="header-text">
+                    <h2>Betaflight Backup</h2>
+                    <span class="version" id="versionLabel"></span>
+                </div>
+            </div>
+            <p class="subtitle">Automated screenshot &amp; CLI backup</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Steps -->
+        <div class="steps">
+            <div class="step">
+                <span class="step-num">1</span>
+                <span>Connect your quad in the <strong>Betaflight Configurator</strong></span>
+            </div>
+            <div class="step">
+                <span class="step-num">2</span>
+                <span>Navigate to the <strong>first tab</strong> (Setup)</span>
+            </div>
+            <div class="step">
+                <span class="step-num">3</span>
+                <span>Select options below and click <strong>Start Backup</strong></span>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="options">
+            <label class="option">
+                <input type="checkbox" id="optScreenshots" checked>
+                <span class="option-check"></span>
+                <span class="option-label">
+                    <strong>Screenshots</strong>
+                    <small>Selected tabs</small>
+                </span>
+            </label>
+            <label class="option">
+                <input type="checkbox" id="optCli" checked>
+                <span class="option-check"></span>
+                <span class="option-label">
+                    <strong>CLI Dump</strong>
+                    <small>diff all + dump all</small>
+                </span>
+            </label>
+            <label class="option">
+                <input type="checkbox" id="optProfiles" checked>
+                <span class="option-check"></span>
+                <span class="option-label">
+                    <strong>Profiles</strong>
+                    <small>Each PID &amp; Rate</small>
+                </span>
+            </label>
+        </div>
+
+        <!-- Tab Selection (collapsible) -->
+        <div class="tab-selection">
+            <div class="tab-selection-header" id="tabSelectionToggle">
+                <span class="tab-selection-arrow">&#9656;</span>
+                <span>Tab Selection</span>
+                <span class="tab-selection-count" id="tabSelectionCount"></span>
+            </div>
+            <div class="tab-selection-body" id="tabSelectionBody">
+                <div class="tab-selection-actions">
+                    <a href="#" id="selectAllTabs">All</a>
+                    <span class="tab-selection-sep">&middot;</span>
+                    <a href="#" id="selectNoneTabs">None</a>
+                </div>
+                <div class="tab-grid" id="tabGrid"></div>
+            </div>
+        </div>
+
+        <!-- Action -->
+        <button id="startBackupBtn">
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2v8m0 0l3-3m-3 3L7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 10 10)"/>
+                <path d="M3 14v1a2 2 0 002 2h10a2 2 0 002-2v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Start Backup
+        </button>
+        <button id="stopBackupBtn" class="stop-btn" style="display:none;">
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="4" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="currentColor"/>
+            </svg>
+            Stop Backup
+        </button>
+
+        <!-- Hint (shown during backup) -->
+        <div id="backupHint" class="backup-hint" style="display:none;">
+            Don't move the mouse over the Betaflight window during backup.
+        </div>
+
+        <!-- Progress bar (hidden by default) -->
+        <div id="progressBar" class="progress-bar">
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <span id="progressLabel" class="progress-label"></span>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="status">
+            <span class="status-dot"></span>
+            <span id="statusText">Ready</span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span class="shortcut">Ctrl+Shift+B</span>
+        </div>
+        <div class="social">
+            Helpful? Follow
+            <a href="https://instagram.com/qriso.fpv" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5A4.25 4.25 0 007.75 20.5h8.5a4.25 4.25 0 004.25-4.25v-8.5A4.25 4.25 0 0016.25 3.5h-8.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 1.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm5.25-2.5a1 1 0 110 2 1 1 0 010-2z"/></svg>
+            </a>
+            <a href="https://tiktok.com/@qriso.fpv" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82A4.28 4.28 0 0115.54 3h-3.09v12.4a2.59 2.59 0 01-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.07 2.52 5.7 5.7 5.7 3.15 0 5.7-2.55 5.7-5.7V9.01a7.35 7.35 0 004.3 1.38V7.3s-1.88.09-3.86-1.48z"/></svg>
+            </a>
+            <span>@qriso.fpv</span>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

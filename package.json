@@ -1,0 +1,8 @@
+{
+  "name": "betaflight-backup-extension",
+  "version": "2.0.0",
+  "description": "Chrome Extension – Automated screenshot & CLI backup for Betaflight Web Configurator",
+  "author": "qriso.fpv",
+  "license": "GPL-3.0-only",
+  "private": true
+}

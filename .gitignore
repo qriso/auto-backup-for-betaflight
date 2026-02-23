@@ -1,0 +1,26 @@
+node_modules/
+package-lock.json
+
+# Debug artifacts
+dom_dump.txt
+dom_dump_utf8.txt
+
+# Build artifacts
+*.zip
+*.crx
+*.pem
+
+# Large demo source files (keep only demo_small.mp4)
+demo.gif
+demo.mp4
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode/
+.idea/
+
+# Claude Code
+.claude/

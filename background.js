@@ -188,7 +188,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // ─── Capture Visible Tab as JPEG ─────────────────────────────────
     if (request.action === "captureTab") {
+        let responded = false;
+        const timeout = setTimeout(() => {
+            if (!responded) {
+                responded = true;
+                sendResponse({ error: "captureVisibleTab timed out after 10s" });
+            }
+        }, 10000);
+
         chrome.tabs.captureVisibleTab(sender.tab.windowId, { format: "jpeg", quality: 80 }, (dataUrl) => {
+            if (responded) return; // timeout already fired
+            responded = true;
+            clearTimeout(timeout);
             if (chrome.runtime.lastError) {
                 sendResponse({ error: chrome.runtime.lastError.message });
             } else {
@@ -210,6 +221,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // ─── Save File into ZIP ──────────────────────────────────────────
     if (request.action === "saveFile") {
+        if (!backupZip) {
+            console.error("[BG] saveFile called but backupZip is null (backup may have been aborted).");
+            sendResponse({ success: false, error: "No active backup" });
+            return true;
+        }
         const folder = backupZip.folder(rootFolderName).folder(request.folderName);
         if (request.isBase64) {
             const base64Data = request.content.split(',')[1];
@@ -361,6 +377,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // ─── Extraction Complete → Build & Download ZIP ──────────────────
     if (request.action === "extractionComplete") {
+        if (!backupZip) {
+            console.error("[BG] extractionComplete called but backupZip is null.");
+            isRunning = false;
+            setBadge('!', '#ef5350');
+            setTimeout(clearBadge, 8000);
+            updateStatus("backupError", "Internal error: ZIP object lost. Please try again.");
+            return true;
+        }
         setBadge('ZIP', '#ff9800');
         updateStatus("backupStatusUpdate", "Generating ZIP file...");
 

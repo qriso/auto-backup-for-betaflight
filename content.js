@@ -23,13 +23,18 @@ chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
         abortRequested = false;
         console.log("[BF-Backup] Received runExtraction signal.");
         const options = request.options || { screenshots: true, cli: true, profiles: true };
-        startBackupProcess(options).catch(e => {
-            console.error("[BF-Backup] Fatal:", e);
-            chrome.runtime.sendMessage({ action: "extractionError", message: e.toString() });
-        }).finally(() => {
-            backupRunning = false;
-            abortRequested = false;
-        });
+        // Wrap in async IIFE to guarantee all errors (sync + async) are caught
+        (async () => {
+            try {
+                await startBackupProcess(options);
+            } catch (e) {
+                console.error("[BF-Backup] Fatal:", e);
+                chrome.runtime.sendMessage({ action: "extractionError", message: e.toString() }).catch(() => {});
+            } finally {
+                backupRunning = false;
+                abortRequested = false;
+            }
+        })();
         return; // no async response needed
     }
     if (request.action === "abortBackup") {
